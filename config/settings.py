@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-3c8ks0k8rw(4ab-@n0dwwbqkis#ucto-jki#mp&32y_gx+0sxh'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['https://pmc-dashboard-mxvm.onrender.com']
+ALLOWED_HOSTS = ['pmc-dashboard-mxvm.onrender.com']
 
 
 CSRF_TRUSTED_ORIGINS = [
