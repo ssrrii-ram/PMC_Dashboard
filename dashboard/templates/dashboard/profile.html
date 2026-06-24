@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile – PMC Dashboard</title>
+    <meta name="description" content="Manage your personal information and change your password for the PMC Dashboard.">
+    <style>
+        :root {
+            --bg:          #f3f6fa;
+            --surface:     #ffffff;
+            --ink:         #101828;
+            --muted:       #5f6b7a;
+            --line:        #d9e1ea;
+            --navy:        #0b2f5b;
+            --navy-2:      #144a86;
+            --navy-light:  #e8f0fb;
+            --green:       #16833a;
+            --green-bg:    #e6f4ec;
+            --red:         #c5221f;
+            --red-bg:      #fde8e8;
+            --accent:      #2563eb;
+            --shadow:      0 18px 45px rgba(16,24,40,.08);
+            --shadow-sm:   0 4px 12px rgba(16,24,40,.06);
+            --radius:      12px;
+            --radius-sm:   6px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; color: var(--ink); background: var(--bg); min-height: 100vh; }
+        button, input, select, textarea { font: inherit; }
+        button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #84c5ff; outline-offset: 2px; }
+
+        .topbar { background: var(--navy); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 58px; gap: 16px; box-shadow: 0 2px 8px rgba(11,47,91,.35); }
+        .topbar-brand { color: #fff; font-weight: 800; font-size: 16px; text-decoration: none; }
+        .topbar-nav { display: flex; align-items: center; gap: 8px; }
+        .btn-nav { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; text-decoration: none; border: 1px solid rgba(255,255,255,.35); color: #fff; background: transparent; cursor: pointer; transition: background .18s, border-color .18s; }
+        .btn-nav:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.6); }
+
+        .page { width: min(860px, calc(100% - 32px)); margin: 0 auto; padding: 36px 0 56px; }
+
+        .page-heading { display: flex; align-items: center; gap: 18px; margin-bottom: 32px; }
+        .avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--navy-2), #3b82f6); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; color: #fff; flex-shrink: 0; box-shadow: var(--shadow-sm); user-select: none; }
+        .page-heading-text h1 { font-size: 24px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+        .page-heading-text p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+        .messages { list-style: none; margin-bottom: 24px; display: grid; gap: 10px; }
+        .messages li { padding: 13px 16px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .messages li.success { background: var(--green-bg); color: var(--green); border: 1px solid #b3e5c7; }
+        .messages li.error { background: var(--red-bg); color: var(--red); border: 1px solid #f5c0c0; }
+
+        .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 24px; transition: box-shadow .2s; }
+        .card:hover { box-shadow: 0 24px 60px rgba(16,24,40,.11); }
+        .card-header { padding: 20px 24px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 14px; background: linear-gradient(to right, #fbfdff, #f5f9ff); }
+        .card-header-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .card-header-icon.blue  { background: #dbeafe; }
+        .card-header-icon.slate { background: #e8edf4; }
+        .card-header-text h2 { font-size: 16px; font-weight: 800; color: var(--ink); }
+        .card-header-text p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+        .card-body { padding: 24px; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+        .field { display: grid; gap: 6px; }
+        .field.span-2 { grid-column: 1 / -1; }
+        .field label { font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+        .field input { width: 100%; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; background: #fff; color: var(--ink); transition: border-color .18s, box-shadow .18s; }
+        .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.12); outline: none; }
+        .field input:hover:not(:focus) { border-color: #a8b6c6; }
+        .field input[readonly] { background: var(--navy-light); color: var(--navy); font-weight: 700; cursor: default; border-color: #c6d8f0; }
+        .field-hint { font-size: 12px; color: var(--muted); line-height: 1.45; }
+        .errorlist { list-style: none; margin: 4px 0 0; display: grid; gap: 3px; }
+        .errorlist li { font-size: 12px; color: var(--red); font-weight: 600; }
+
+        .form-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; border: 1px solid transparent; transition: all .18s; }
+        .btn-primary { background: var(--navy); color: #fff; }
+        .btn-primary:hover { background: var(--navy-2); box-shadow: 0 4px 14px rgba(11,47,91,.35); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-ghost { background: transparent; color: var(--muted); border-color: var(--line); }
+        .btn-ghost:hover { background: var(--bg); color: var(--ink); border-color: #b0bfcf; }
+
+        .strength-meter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 6px; }
+        .strength-bar { height: 4px; border-radius: 2px; background: var(--line); transition: background .25s; }
+
+        .info-strip { display: flex; gap: 24px; flex-wrap: wrap; padding: 16px 0 0; border-top: 1px solid var(--line); margin-top: 20px; }
+        .info-item { display: grid; gap: 3px; }
+        .info-item dt { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+        .info-item dd { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+        @media (max-width: 620px) {
+            .page { padding: 20px 0 40px; }
+            .page-heading { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .field.span-2 { grid-column: auto; }
+            .form-actions { flex-direction: column-reverse; align-items: stretch; }
+            .btn { width: 100%; }
+            .info-strip { gap: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="topbar" aria-label="Site navigation">
+        <a class="topbar-brand" href="{% url 'dashboard:home' %}">&#x2B21; PMC Dashboard</a>
+        <div class="topbar-nav">
+            <a class="btn-nav" href="{% url 'dashboard:home' %}">&larr; Dashboard</a>
+            <a class="btn-nav" href="{% url 'dashboard:data_entry' %}">Manage Data</a>
+            <form method="post" action="{% url 'dashboard:logout' %}" style="margin:0;">
+                {% csrf_token %}
+                <button class="btn-nav" type="submit">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <main class="page">
+
+        {% if messages %}
+            <ul class="messages" role="alert">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">
+                        {% if 'success' in message.tags %}&#10003;{% else %}&#10005;{% endif %}
+                        {{ message }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="page-heading">
+            <div class="avatar" aria-hidden="true" id="avatar-initials">
+                {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
+            </div>
+            <div class="page-heading-text">
+                <h1>
+                    {% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}
+                </h1>
+                <p>@{{ request.user.username }} &middot; Member since {{ request.user.date_joined|date:"F Y" }}</p>
+            </div>
+        </div>
+
+        <!-- Personal Information Card -->
+        <section class="card" aria-labelledby="personal-info-heading">
+            <div class="card-header">
+                <div class="card-header-icon blue" aria-hidden="true">&#128100;</div>
+                <div class="card-header-text">
+                    <h2 id="personal-info-heading">Personal Information</h2>
+                    <p>Update your name and email address.</p>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="post" id="profile-form" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_profile">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="id_username_ro">Username</label>
+                            <input id="id_username_ro" type="text" value="{{ request.user.username }}" readonly aria-describedby="username-hint">
+                            <span class="field-hint" id="username-hint">Usernames cannot be changed.</span>
+                        </div>
+                        <div class="field">
+                            <label for="{{ profile_form.email.id_for_label }}">Email Address</label>
+                            {{ profile_form.email }}
+                            {% if profile_form.email.errors %}
+                                <ul class="errorlist" role="alert">{% for err in profile_form.email.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+                            {% endif %}
+                        </div>
+                        <div class="field">
+                            <label for="{{ profile_form.first_name.id_for_label }}">First Name</label>
+                            {{ profile_form.first_name }}
+                            {% if profile_form.first_name.errors %}
+                                <ul class="errorlist" role="alert">{% for err in profile_form.first_name.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+                            {% endif %}
+                        </div>
+                        <div class="field">
+                            <label for="{{ profile_form.last_name.id_for_label }}">Last Name</label>
+                            {{ profile_form.last_name }}
+                            {% if profile_form.last_name.errors %}
+                                <ul class="errorlist" role="alert">{% for err in profile_form.last_name.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <dl class="info-strip">
+                        <div class="info-item">
+                            <dt>Account Status</dt>
+                            <dd>{% if request.user.is_active %}&#9989; Active{% else %}&#9940; Inactive{% endif %}</dd>
+                        </div>
+                        <div class="info-item">
+                            <dt>Role</dt>
+                            <dd>{% if request.user.is_superuser %}Super Admin{% elif request.user.is_staff %}Staff{% else %}Standard User{% endif %}</dd>
+                        </div>
+                        <div class="info-item">
+                            <dt>Last Login</dt>
+                            <dd>{{ request.user.last_login|date:"d M Y, H:i"|default:"Never" }}</dd>
+                        </div>
+                    </dl>
+                    <div class="form-actions">
+                        <a href="{% url 'dashboard:home' %}" class="btn btn-ghost">Cancel</a>
+                        <button type="submit" class="btn btn-primary" id="save-profile-btn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Change Password Card -->
+        <section class="card" aria-labelledby="change-password-heading">
+            <div class="card-header">
+                <div class="card-header-icon slate" aria-hidden="true">&#128274;</div>
+                <div class="card-header-text">
+                    <h2 id="change-password-heading">Change Password</h2>
+                    <p>Choose a strong password you haven't used before.</p>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="post" id="password-form" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="change_password">
+                    <div class="form-grid">
+                        <div class="field span-2">
+                            <label for="{{ password_form.old_password.id_for_label }}">Current Password</label>
+                            {{ password_form.old_password }}
+                            {% if password_form.old_password.errors %}
+                                <ul class="errorlist" role="alert">{% for err in password_form.old_password.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+                            {% endif %}
+                        </div>
+                        <div class="field">
+                            <label for="{{ password_form.new_password1.id_for_label }}">New Password</label>
+                            {{ password_form.new_password1 }}
+                            <div class="strength-meter" aria-hidden="true">
+                                <div class="strength-bar" id="sb1"></div>
+                                <div class="strength-bar" id="sb2"></div>
+                                <div class="strength-bar" id="sb3"></div>
+                                <div class="strength-bar" id="sb4"></div>
+                            </div>
+                            {% if password_form.new_password1.errors %}
+                                <ul class="errorlist" role="alert">{% for err in password_form.new_password1.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+                            {% endif %}
+                        </div>
+                        <div class="field">
+                            <label for="{{ password_form.new_password2.id_for_label }}">Confirm New Password</label>
+                            {{ password_form.new_password2 }}
+                            {% if password_form.new_password2.errors %}
+                                <ul class="errorlist" role="alert">{% for err in password_form.new_password2.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+                            {% endif %}
+                        </div>
+                        {% if password_form.non_field_errors %}
+                            <div class="field span-2">
+                                <ul class="errorlist" role="alert">{% for err in password_form.non_field_errors %}<li>{{ err }}</li>{% endfor %}</ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-ghost" onclick="document.getElementById('password-form').reset(); ['sb1','sb2','sb3','sb4'].forEach(function(id){document.getElementById(id).style.background='var(--line)';});">Clear</button>
+                        <button type="submit" class="btn btn-primary" id="change-password-btn">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Avatar initials fallback
+        (function () {
+            var el = document.getElementById('avatar-initials');
+            if (el && el.textContent.trim() === '') {
+                el.textContent = '{{ request.user.username|slice:":2"|upper }}';
+            }
+        })();
+
+        // Password strength meter
+        (function () {
+            var pwInput = document.getElementById('{{ password_form.new_password1.id_for_label }}');
+            if (!pwInput) return;
+            var bars = ['sb1','sb2','sb3','sb4'].map(function(id){ return document.getElementById(id); });
+            var colors = ['#ef4444', '#f97316', '#eab308', '#16a34a'];
+            function score(pw) {
+                var s = 0;
+                if (pw.length >= 8)          s++;
+                if (/[A-Z]/.test(pw))        s++;
+                if (/[0-9]/.test(pw))        s++;
+                if (/[^A-Za-z0-9]/.test(pw)) s++;
+                return s;
+            }
+            pwInput.addEventListener('input', function () {
+                var s = this.value ? score(this.value) : 0;
+                bars.forEach(function(bar, idx) {
+                    bar.style.background = idx < s ? colors[s - 1] : 'var(--line)';
+                });
+            });
+        })();
+
+        // Apply CSS to Django-rendered inputs inside card bodies
+        (function() {
+            var sel = '.card-body input[type="text"]:not([readonly]),' +
+                      '.card-body input[type="email"],' +
+                      '.card-body input[type="password"]';
+            var style = 'width:100%;border:1px solid var(--line);border-radius:var(--radius-sm);' +
+                        'padding:10px 12px;font-size:14px;background:#fff;color:var(--ink);' +
+                        'transition:border-color .18s,box-shadow .18s;display:block;';
+            document.querySelectorAll(sel).forEach(function(el) {
+                el.style.cssText += style;
+                el.addEventListener('focus', function() {
+                    this.style.borderColor = 'var(--accent)';
+                    this.style.boxShadow = '0 0 0 3px rgba(37,99,235,.12)';
+                    this.style.outline = 'none';
+                });
+                el.addEventListener('blur', function() {
+                    this.style.borderColor = '';
+                    this.style.boxShadow = '';
+                });
+            });
+        })();
+    </script>
+
+</body>
+</html>

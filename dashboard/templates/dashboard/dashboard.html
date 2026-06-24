@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTL Ltd. – PMC Dashboard</title>
+    <style>
+        :root {
+            --bg: #f3f6fa;
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+            --ink: #101828;
+            --muted: #5f6b7a;
+            --line: #d9e1ea;
+            --navy: #0b2f5b;
+            --navy-2: #144a86;
+            --green: #16833a;
+            --yellow: #b7791f;
+            --red: #c5221f;
+            --gray: #667085;
+            --shadow: 0 18px 45px rgba(16, 24, 40, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+        }
+
+        button, input, select { font: inherit; }
+
+        button:focus-visible, a:focus-visible, select:focus-visible {
+            outline: 3px solid #84c5ff;
+            outline-offset: 2px;
+        }
+
+        .photos-toggle-container {
+            overflow: visible !important;
+            height: auto !important;
+            max-height: none !important;
+            padding: 10px 0; /* Give it some space */
+        }
+
+        .page {
+            width: min(1480px, calc(100% - 28px));
+            margin: 0 auto;
+            padding: 18px 0 28px;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: center;
+            background: var(--navy);
+            color: #fff;
+            border-radius: 10px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            margin-bottom: 14px;
+        }
+
+        h1, h2, h3, p { margin: 0; }
+
+        h1 {
+            font-size: 28px;
+            line-height: 1.15;
+            letter-spacing: 0;
+        }
+
+        .hero-meta {
+            margin-top: 8px;
+            color: #d6e7f8;
+            font-size: 14px;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .project-switcher {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .project-switcher label {
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .project-switcher select {
+            min-width: 220px;
+            max-width: 320px;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            border-radius: 6px;
+            padding: 9px 10px;
+            color: var(--navy);
+            background: #fff;
+            font-weight: 800;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 8px 12px;
+            background: #fff;
+            color: var(--navy);
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .button.secondary {
+            background: transparent;
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.55);
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .layout-top {
+            display: grid;
+            grid-template-columns: 1.05fr 1.6fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .layout-main {
+            display: grid;
+            grid-template-columns: 1.08fr 1fr 0.92fr;
+            gap: 14px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--line);
+            background: #fbfdff;
+        }
+
+        .panel-title {
+            font-size: 15px;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 0;
+        }
+
+        .panel-body { padding: 16px; }
+
+        .project-info {
+            display: grid;
+            gap: 11px;
+            font-size: 14px;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 128px 1fr;
+            gap: 10px;
+        }
+
+        .info-label {
+            color: var(--muted);
+            font-weight: 800;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .kpi {
+            min-height: 118px;
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--surface-soft);
+        }
+
+        .kpi-label {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .kpi-value {
+            margin-top: 14px;
+            font-size: 30px;
+            line-height: 1;
+            font-weight: 900;
+            color: var(--navy);
+        }
+
+        .kpi-value.good { color: var(--green); }
+        .kpi-value.warn { color: var(--red); }
+
+        .status-body {
+            display: grid;
+            grid-template-columns: 142px 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .donut {
+            width: 142px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at center, #fff 0 38%, transparent 39%),
+                conic-gradient(var(--green) 0 56%, #d99a14 56% 78%, var(--red) 78% 100%);
+            display: grid;
+            place-items: center;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 900;
+            border: 1px solid var(--line);
+        }
+
+        .legend {
+            display: grid;
+            gap: 13px;
+            font-size: 14px;
+        }
+
+        .legend-row {
+            display: grid;
+            grid-template-columns: 12px 1fr auto;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .green { background: var(--green); }
+        .yellow { background: var(--yellow); }
+        .red { background: var(--red); }
+        .gray { background: var(--gray); }
+
+        .gantt {
+            display: grid;
+            gap: 11px;
+        }
+
+        .gantt-row {
+            display: grid;
+            grid-template-columns: 145px 1fr 48px;
+            gap: 10px;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .gantt-name {
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .gantt-track {
+            position: relative;
+            height: 26px;
+            border: 1px solid var(--line);
+            background:
+                linear-gradient(to right, rgba(11, 47, 91, 0.08) 1px, transparent 1px),
+                #f8fafc;
+            background-size: 25% 100%;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .gantt-bar {
+            position: absolute;
+            top: 5px;
+            height: 14px;
+            border-radius: 999px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border-bottom: 1px solid var(--line);
+            padding: 10px 8px;
+            font-size: 12px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: 0; }
+
+        th {
+            color: var(--muted);
+            background: var(--surface-soft);
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .number { text-align: right; }
+        .center { text-align: center; }
+
+        .chart-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 72px 1fr 64px;
+            gap: 10px;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .bars {
+            display: grid;
+            gap: 4px;
+        }
+
+        .bar-track {
+            height: 10px;
+            background: #edf2f7;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .bar {
+            height: 100%;
+            min-width: 3px;
+            border-radius: inherit;
+        }
+
+        .bar.cash { background: var(--navy-2); }
+        .bar.actual { background: var(--green); }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .photo-button {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            padding: 0;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .photo-button img {
+            width: 100%;
+            height: 132px;
+            object-fit: cover;
+            display: block;
+            background: var(--surface-soft);
+        }
+
+        .photo-caption {
+            padding: 9px;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--ink);
+        }
+
+        .manpower-layout {
+            display: grid;
+            grid-template-columns: 0.8fr 1.2fr 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .manpower-total {
+            text-align: center;
+            border-right: 1px solid var(--line);
+            padding-right: 16px;
+        }
+
+        .manpower-chart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .manpower-pie {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+
+        .manpower-pie::after {
+            content: "";
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            width: 72px;
+            height: 72px;
+            background: var(--surface);
+            border-radius: 50%;
+        }
+
+        .manpower-pie-empty {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--muted);
+            border: 2px dashed var(--line);
+        }
+
+        .photos-toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 16px;
+        }
+        
+        .photo-button.hidden-photo {
+            display: none;
+        }
+        
+        .button.small {
+            min-height: auto;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .manpower-total strong {
+            display: block;
+            margin-top: 8px;
+            color: var(--navy);
+            font-size: 32px;
+        }
+
+        .manpower-list {
+            display: grid;
+            gap: 9px;
+            font-size: 13px;
+        }
+
+        .empty {
+            color: var(--muted);
+            border: 1px dashed var(--line);
+            background: var(--surface-soft);
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 13px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            place-items: center;
+            background: rgba(16, 24, 40, 0.78);
+            padding: 24px;
+            z-index: 30;
+        }
+
+        .modal.is-open { display: grid; }
+
+        .modal-card {
+            width: min(1000px, 100%);
+            max-height: min(760px, 92vh);
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+        }
+
+        .modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .modal-title {
+            font-weight: 900;
+        }
+
+        .modal-close {
+            border: 0;
+            border-radius: 6px;
+            background: var(--navy);
+            color: #fff;
+            padding: 8px 11px;
+            cursor: pointer;
+            font-weight: 900;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: calc(92vh - 72px);
+            object-fit: contain;
+            display: block;
+            background: #0f172a;
+        }
+
+        @media (max-width: 1120px) {
+            .hero, .layout-top, .layout-main {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-actions {
+                justify-content: flex-start;
+            }
+
+            .status-body, .manpower-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .manpower-total {
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+                padding: 0 0 14px;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .page {
+                width: min(100% - 18px, 1480px);
+                padding-top: 10px;
+            }
+
+            h1 { font-size: 23px; }
+            .hero-actions { align-items: stretch; }
+            .project-switcher, .hero-actions, .button { width: 100%; }
+            .project-switcher { display: grid; }
+            .project-switcher select { min-width: 0; max-width: none; width: 100%; }
+            .kpi-grid, .photo-grid { grid-template-columns: 1fr; }
+            .gantt-row, .chart-row, .info-row { grid-template-columns: 1fr; }
+        }
+
+        @media print {
+            body {
+                background: #fff !important;
+                color: #000 !important;
+            }
+            .hero-actions, .button, .logout-form, .modal, .photos-toggle-container {
+                display: none !important;
+            }
+            .panel-head span.kpi-label {
+                display: none !important;
+            }
+            .page {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .layout-top, .layout-main {
+                display: block !important;
+            }
+            .panel {
+                break-inside: avoid;
+                margin-bottom: 20px !important;
+                border: 1px solid var(--line) !important;
+                box-shadow: none !important;
+            }
+            .gantt-bar, .bar, .manpower-pie, .badge, .badge-count, .dot {
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+            }
+            .photo-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 10px !important;
+            }
+            .photo-button {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="hero">
+            <div>
+                <h1>HTL Ltd. – PMC Dashboard</h1>
+                <p class="hero-meta">Reporting date: {{ today|date:"d M Y" }} · Signed in as {{ request.user.username }}</p>
+            </div>
+            <div class="hero-actions">
+                {% if projects %}
+                    <form class="project-switcher" method="get">
+                        <label for="project">Project</label>
+                        <select id="project" name="project" onchange="this.form.submit()">
+                            {% for item in projects %}
+                                <option value="{{ item.id }}" {% if item.id == selected_project_id %}selected{% endif %}>
+                                    {{ item.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                {% endif %}
+                <a class="button" href="{% url 'dashboard:data_entry' %}">Manage Data</a>
+                <button class="button" onclick="window.print()">Export PDF</button>
+                <button class="button" onclick="window.location.href='{% url 'dashboard:profile' %}'">Profile</button>
+                <form class="logout-form" method="post" action="{% url 'dashboard:logout' %}">
+                    {% csrf_token %}
+                    <button class="button secondary" type="submit">Logout</button>
+                </form>
+            </div>
+        </header>
+
+        <section class="layout-top" aria-label="Executive summary">
+            <article class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title">Project Brief</h2>
+                </div>
+                <div class="panel-body">
+                    {% if project %}
+                        <div class="project-info">
+                            <div class="info-row"><span class="info-label">Project</span><strong>{{ project.name }}</strong></div>
+                            <div class="info-row"><span class="info-label">Location</span><span>{{ project.location }}</span></div>
+                            {% comment %} <div class="info-row"><span class="info-label">Client</span><span>{{ project.client }}</span></div> {% endcomment %}
+                            {% comment %} <div class="info-row"><span class="info-label">PMC</span><span>{{ project.pmc }}</span></div> {% endcomment %}
+                            <div class="info-row"><span class="info-label">Contractor</span><span>{{ project.contractor }}</span></div>
+                            <div class="info-row"><span class="info-label">Type</span><span>{{ project.project_type|default:"-" }}</span></div>
+                            <div class="info-row"><span class="info-label">Duration</span><span>{{ project.start_date|date:"d M Y" }} to {{ project.target_completion|date:"d M Y" }}</span></div>
+                        </div>
+                    {% else %}
+                        <p class="empty">Add a project from Manage Data to populate this dashboard.</p>
+                    {% endif %}
+                </div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title">Key Progress Summary</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="kpi-grid">
+                        <div class="kpi">
+                            <p class="kpi-label">Overall Progress</p>
+                            <p class="kpi-value">{{ stats.actual_progress }}%</p>
+                        </div>
+                        <div class="kpi">
+                            <p class="kpi-label">Planned Progress</p>
+                            <p class="kpi-value">{{ stats.planned_progress }}%</p>
+                        </div>
+                        <div class="kpi">
+                            <p class="kpi-label">SPI</p>
+                            <p class="kpi-value {% if stats.spi < 1 %}warn{% endif %}">{{ stats.spi }}</p>
+                        </div>
+                        <div class="kpi">
+                            <p class="kpi-label">CPI</p>
+                            <p class="kpi-value {% if stats.cpi >= 1 %}good{% else %}warn{% endif %}">{{ stats.cpi }}</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title">Status At A Glance</h2>
+                </div>
+                <div class="panel-body status-body">
+                    <div class="donut" aria-label="{{ stats.activity_total }} total activities">TOTAL<br>ACTIVITIES<br>{{ stats.activity_total }}</div>
+                    <div class="legend">
+                        {% for status in status_cards %}
+                            <div class="legend-row">
+                                <span class="dot {{ status.class }}" aria-hidden="true"></span>
+                                <strong>{{ status.label }}</strong>
+                                <span>{{ status.count }} ({{ status.percent }}%)</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="layout-main">
+            <article class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title">Gantt Chart</h2>
+                </div>
+                <div class="panel-body">
+                    {% if gantt_rows %}
+                        <div class="gantt">
+                            {% for row in gantt_rows %}
+                                <div class="gantt-row">
+                                    <span class="gantt-name">{{ row.name }}</span>
+                                    <div class="gantt-track" title="{{ row.start|date:'d M Y' }} to {{ row.finish|date:'d M Y' }}">
+                                        <div class="gantt-bar {{ row.status_class }}" style="left: {{ row.left }}%; width: {{ row.width }}%"></div>
+                                    </div>
+                                    <span>{{ row.progress }}%</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="empty">Add activities with planned start and finish dates to show the Gantt chart.</p>
+                    {% endif %}
+                </div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title">Progress By Discipline</h2>
+                </div>
+                {% if discipline_rows %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Discipline / Area</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>No. of Days</th>
+                                <th>Plan</th>
+                                <th>Actual</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in discipline_rows %}
+                                <tr>
+                                    <td>{{ row.discipline }}</td>
+                                    <td>{{ row.start_date|date:"d M Y"|default:"-" }}</td>
+                                    <td>{{ row.end_date|date:"d M Y"|default:"-" }}</td>
+                                    <td class="number">{{ row.duration|default:"-" }}</td>
+                                    <td class="number">{{ row.planned }}%</td>
+                                    <td class="number">{{ row.actual }}%</td>
+                                    <td class="center"><span class="dot {{ row.status_class }}" aria-label="{{ row.status }}"></span></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="panel-body">
+                        <p class="empty">Add discipline progress records to fill this table.</p>
+                    </div>
+                {% endif %}
+            </article>
+
+            <article class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title">Manpower On Site</h2>
+                </div>
+                <div class="panel-body manpower-layout">
+                    <div class="manpower-total">
+                        <p class="kpi-label">Total Manpower</p>
+                        <strong>{{ stats.manpower_total }}</strong>
+                    </div>
+
+                    {% if manpower_chart.has_data %}
+                        <div class="manpower-chart-container" title="Manpower Breakdown Pie Chart">
+                            <div class="manpower-pie" style="background: conic-gradient(
+                                var(--green) 0% {{ manpower_chart.p_skilled }}%,
+                                #f1b000 {{ manpower_chart.p_skilled }}% {{ manpower_chart.p_semi_skilled_end }}%,
+                                var(--red) {{ manpower_chart.p_semi_skilled_end }}% {{ manpower_chart.p_unskilled_end }}%,
+                                #8e9aaf {{ manpower_chart.p_unskilled_end }}% 100%
+                            )"></div>
+                        </div>
+                    {% else %}
+                        <div class="manpower-chart-container">
+                            <div class="manpower-pie-empty">No Data</div>
+                        </div>
+                    {% endif %}
+
+                    <div class="manpower-list">
+                        <div class="legend-row"><span class="dot green"></span><strong>Skilled</strong><span>{{ manpower.skilled }}</span></div>
+                        <div class="legend-row"><span class="dot yellow"></span><strong>Semi Skilled</strong><span>{{ manpower.semi_skilled }}</span></div>
+                        <div class="legend-row"><span class="dot red"></span><strong>Unskilled</strong><span>{{ manpower.unskilled }}</span></div>
+                        <div class="legend-row"><span class="dot gray"></span><strong>Engineers</strong><span>{{ manpower.engineers }}</span></div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title">Cash Flow</h2>
+                </div>
+                <div class="panel-body">
+                    {% if cash_rows %}
+                        <div class="chart-list">
+                            {% for row in cash_rows %}
+                                <div class="chart-row">
+                                    <strong>{{ row.month|date:"M-y" }}</strong>
+                                    <div class="bars" aria-label="Planned and actual cash flow">
+                                        <div class="bar-track"><div class="bar cash" style="width: {{ row.planned_width }}%"></div></div>
+                                        <div class="bar-track"><div class="bar actual" style="width: {{ row.actual_width }}%"></div></div>
+                                    </div>
+                                    <span>₹{{ row.actual|floatformat:0 }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="empty">Add cash flow records to show planned and actual values.</p>
+                    {% endif %}
+                </div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title">Site Progress Photos</h2>
+                    <span class="kpi-label">Click to enlarge</span>
+                </div>
+                <div class="panel-body">
+                    {% if recent_photos %}
+                        <div class="photo-grid" id="photoGrid">
+                            {% for photo in recent_photos %}
+                                <button class="photo-button {% if forloop.counter > 3 %}hidden-photo{% endif %}" type="button" data-image="{{ photo.image.url }}" data-title="{{ photo.title }}" aria-label="Open larger image for {{ photo.title }}">
+                                    <img src="{{ photo.image.url }}" alt="{{ photo.title }}">
+                                    <span class="photo-caption">{{ photo.title }}</span>
+                                </button>
+                            {% endfor %}
+                        </div>
+                        {% if recent_photos|length > 3 %}
+                            <div class="photos-toggle-container">
+                                <button class=" button small" id="togglePhotosBtn" onclick="toggleAllPhotos()" data-expanded="false">
+                                    Show More ({{ recent_photos|length|add:"-3" }} more)
+                                </button>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p class="empty">Upload site photos to display progress snapshots.</p>
+                    {% endif %}
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <div class="modal" id="photoModal" role="dialog" aria-modal="true" aria-labelledby="photoModalTitle">
+        <div class="modal-card">
+            <div class="modal-head">
+                <p class="modal-title" id="photoModalTitle">Site photo</p>
+                <button class="modal-close" type="button" id="photoModalClose">Close</button>
+            </div>
+            <img class="modal-image" id="photoModalImage" alt="">
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById("photoModal");
+        const modalImage = document.getElementById("photoModalImage");
+        const modalTitle = document.getElementById("photoModalTitle");
+        const modalClose = document.getElementById("photoModalClose");
+        let lastFocused = null;
+
+        function openPhoto(button) {
+            lastFocused = button;
+            modalImage.src = button.dataset.image;
+            modalImage.alt = button.dataset.title;
+            modalTitle.textContent = button.dataset.title;
+            modal.classList.add("is-open");
+            modalClose.focus();
+        }
+
+        function closePhoto() {
+            modal.classList.remove("is-open");
+            modalImage.src = "";
+            if (lastFocused) {
+                lastFocused.focus();
+            }
+        }
+
+        document.querySelectorAll(".photo-button").forEach((button) => {
+            button.addEventListener("click", () => openPhoto(button));
+        });
+
+        modalClose.addEventListener("click", closePhoto);
+        modal.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                closePhoto();
+            }
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && modal.classList.contains("is-open")) {
+                closePhoto();
+            }
+        });
+
+        function toggleAllPhotos() {
+            const grid = document.getElementById("photoGrid");
+            const btn = document.getElementById("togglePhotosBtn");
+            const isExpanded = btn.getAttribute("data-expanded") === "true";
+            
+            if (isExpanded) {
+                // Collapse
+                grid.querySelectorAll(".photo-button").forEach((item, index) => {
+                    if (index >= 3) {
+                        item.style.display = "none";
+                    }
+                });
+                btn.textContent = "Show More ({{ recent_photos|length|add:'-3' }} more)";
+                btn.setAttribute("data-expanded", "false");
+            } else {
+                // Expand
+                grid.querySelectorAll(".photo-button").forEach((item) => {
+                    item.style.display = "block";
+                });
+                btn.textContent = "Show Less";
+                btn.setAttribute("data-expanded", "true");
+            }
+        }
+    </script>
+</body>
+</html>

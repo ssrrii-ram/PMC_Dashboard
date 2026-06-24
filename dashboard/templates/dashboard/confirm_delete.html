@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete {{ label }} - PMC Dashboard</title>
+    <style>
+        :root {
+            --bg: #f3f6fa;
+            --surface: #ffffff;
+            --ink: #101828;
+            --muted: #5f6b7a;
+            --line: #d9e1ea;
+            --navy: #0b2f5b;
+            --red: #c5221f;
+            --red-soft: #fdf2f2;
+            --red-border: #f8b4b4;
+            --shadow: 0 18px 45px rgba(16, 24, 40, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+        }
+
+        button, input, select, textarea { font: inherit; }
+
+        .page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: var(--red-soft);
+            border-bottom: 1px solid var(--red-border);
+            color: var(--red);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header svg {
+            flex-shrink: 0;
+        }
+
+        .card-header h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .warning-text {
+            line-height: 1.5;
+            color: var(--ink);
+            margin: 0 0 20px 0;
+        }
+
+        .detail-box {
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .detail-box label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--muted);
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .detail-box p {
+            margin: 0;
+            font-weight: 800;
+            color: var(--navy);
+            font-size: 16px;
+        }
+
+        .form-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 10px 16px;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .button.danger {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .button.danger:hover {
+            opacity: 0.9;
+        }
+
+        .button.secondary {
+            background: #fff;
+            color: var(--muted);
+            border-color: var(--line);
+        }
+
+        .button.secondary:hover {
+            background: #f8fafc;
+            color: var(--ink);
+        }
+
+        @media (max-width: 480px) {
+            .form-actions {
+                flex-direction: column-reverse;
+                align-items: stretch;
+            }
+            .button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <div class="card">
+            <header class="card-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <h1>Delete {{ label }}</h1>
+            </header>
+            <div class="card-body">
+                <p class="warning-text">Are you sure you want to permanently delete this {{ label }} entry? This action cannot be undone and will affect related dashboard widgets.</p>
+                
+                <div class="detail-box">
+                    <label>Item to be deleted</label>
+                    <p>
+                        {% if model_name == 'project' %}
+                            {{ instance.name }}
+                        {% elif model_name == 'discipline' %}
+                            {{ instance.name }}
+                        {% elif model_name == 'discipline_progress' %}
+                            {{ instance.project.name }} &mdash; {{ instance.discipline.name }} ({{ instance.report_date }})
+                        {% elif model_name == 'monthly_progress' %}
+                            {{ instance.project.name }} &mdash; {{ instance.month|date:"M Y" }}
+                        {% elif model_name == 'activity' %}
+                            {{ instance.project.name }} &mdash; {{ instance.activity_name }}
+                        {% elif model_name == 'cash_flow' %}
+                            {{ instance.project.name }} &mdash; {{ instance.month|date:"M Y" }}
+                        {% elif model_name == 'manpower' %}
+                            {{ instance.project.name }} &mdash; Manpower Report ({{ instance.report_date }})
+                        {% elif model_name == 'site_photo' %}
+                            {{ instance.project.name }} &mdash; {{ instance.title }}
+                        {% else %}
+                            {{ instance }}
+                        {% endif %}
+                    </p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-actions">
+                        <a href="{% url 'dashboard:data_entry' %}" class="button secondary">Cancel</a>
+                        <button type="submit" class="button danger">Yes, Delete Entry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
